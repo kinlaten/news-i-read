@@ -1,7 +1,7 @@
 import os
 import datetime
 import exa_py
-import google.generativeai as genai
+from google import genai
 
 # Setup API keys from environment variables
 EXA_API_KEY = os.environ.get("EXA_API_KEY")
@@ -13,8 +13,7 @@ if not EXA_API_KEY or not GEMINI_API_KEY:
 
 # Initialize Exa client and Gemini
 exa = exa_py.Exa(EXA_API_KEY)
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 def get_daily_news():
     # Search for breaking tech news from the last 24 hours
@@ -55,7 +54,10 @@ def summarize_news(news_context):
     {news_context}
     """
     
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt
+    )
     return response.text
 
 def main():
