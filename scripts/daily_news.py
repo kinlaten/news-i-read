@@ -15,6 +15,7 @@ if not EXA_API_KEY or not GEMINI_API_KEY:
 exa = exa_py.Exa(EXA_API_KEY)
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+
 def get_daily_news():
     # Search for breaking tech news from the last 24 hours
     one_day_ago = (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat()
@@ -22,15 +23,16 @@ def get_daily_news():
         "breaking tech news today",
         type="auto",
         num_results=8,
-        start_published_date=one_day_ago
+        start_published_date=one_day_ago,
     )
-    
+
     # Format the results for the LLM
     context = ""
     for res in search_results.results:
         context += f"Title: {res.title}\nURL: {res.url}\nContent Snippet: {res.text[:500]}\n---\n"
-    
+
     return context
+
 
 def summarize_news(news_context):
     today = datetime.date.today().strftime("%B %d, %Y")
@@ -53,34 +55,35 @@ def summarize_news(news_context):
     NEWS CONTEXT:
     {news_context}
     """
-    
+
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
+        model="gemini-2.5-flash-lite", contents=prompt
     )
     return response.text
+
 
 def main():
     print("Fetching tech news...")
     news_context = get_daily_news()
-    
+
     print("Summarizing news...")
     summary = summarize_news(news_context)
-    
+
     # Determine the directory and file path
     now = datetime.datetime.now()
     year_dir = str(now.year)
     month_dir = str(now.month)
     day_file = f"{now.day}.md"
-    
+
     full_path = os.path.join(year_dir, month_dir, day_file)
     os.makedirs(os.path.join(year_dir, month_dir), exist_ok=True)
-    
+
     print(f"Saving news to {full_path}...")
     with open(full_path, "w") as f:
         f.write(summary)
-    
+
     print("Done!")
+
 
 if __name__ == "__main__":
     main()
