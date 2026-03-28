@@ -26,7 +26,8 @@ jobs:
         env:
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_TECH: ${{ secrets.DISCORD_WEBHOOK_TECH }}
+          DISCORD_WEBHOOK_AU_LAW: ${{ secrets.DISCORD_WEBHOOK_AU_LAW }}
         run: python scripts/daily_news.py
         
       - name: Commit and Push changes
