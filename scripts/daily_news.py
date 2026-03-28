@@ -1,11 +1,13 @@
 import os
 import datetime
 import exa_py
+import requests
 from google import genai
 
 # Setup API keys from environment variables
 EXA_API_KEY = os.environ.get("EXA_API_KEY")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 
 if not EXA_API_KEY or not GEMINI_API_KEY:
     print("Error: EXA_API_KEY or GEMINI_API_KEY not found in environment.")
@@ -36,13 +38,40 @@ def get_daily_news():
 
 def summarize_news(news_context):
     today = datetime.date.today().strftime("%B %d, %Y")
+
+    # Fetch mandates from both local and global sources
+    mandates = []
+
+    # Global ~/.gemini/GEMINI.md
+    global_path = os.path.expanduser("~/.gemini/GEMINI.md")
+    if os.path.exists(global_path):
+        try:
+            with open(global_path, "r") as f:
+                mandates.append(f"--- GLOBAL MANDATES ---\n{f.read()}")
+        except Exception as e:
+            print(f"Warning: Could not read global GEMINI.md: {e}")
+
+    # Local GEMINI.md
+    local_path = "GEMINI.md"
+    if os.path.exists(local_path):
+        try:
+            with open(local_path, "r") as f:
+                mandates.append(f"--- LOCAL MANDATES ---\n{f.read()}")
+        except Exception as e:
+            print(f"Warning: Could not read local GEMINI.md: {e}")
+
+    combined_mandates = "\n\n".join(mandates)
+
     prompt = f"""
     You are a professional tech news curator. Summarize the following news context for {today}.
     
-    MANDATES:
-    - Automatically create a markdown file (named by the day, e.g., '28.md') in the corresponding 'year/month' directory with the content of web search results after every search.
-    - Ensure search results include the related link to the website for each piece of information.
-    - Use a less bold format for the markdown content (avoid excessive use of **bold** text).
+    MANDATES FROM PROJECT CONFIGURATION:
+    {combined_mandates}
+
+    ADDITIONAL FORMATTING RULES:
+    - Use a less bold format (avoid excessive use of **bold** text).
+    - DO NOT wrap the output in markdown code blocks (e.g., ```markdown or ```).
+    - Return RAW markdown text only.
     
     FORMAT:
     # Breaking Tech News - {today}
@@ -60,6 +89,24 @@ def summarize_news(news_context):
         model="gemini-2.5-flash-lite", contents=prompt
     )
     return response.text
+
+
+def send_to_discord(content):
+    if not DISCORD_WEBHOOK_URL:
+        print("No Discord Webhook URL found, skipping notification.")
+        return
+
+    # Discord has a 2000 character limit per message
+    if len(content) > 1900:
+        content = content[:1900] + "\n\n... (Truncated. Check GitHub for full report)"
+
+    payload = {"content": content}
+    try:
+        response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
+        response.raise_for_status()
+        print("Successfully sent to Discord!")
+    except Exception as e:
+        print(f"Error sending to Discord: {e}")
 
 
 def main():
@@ -81,6 +128,9 @@ def main():
     print(f"Saving news to {full_path}...")
     with open(full_path, "w") as f:
         f.write(summary)
+
+    print("Sending to Discord...")
+    send_to_discord(summary)
 
     print("Done!")
 

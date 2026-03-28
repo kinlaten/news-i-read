@@ -20,12 +20,13 @@ jobs:
           
       - name: Install Dependencies
         run: |
-          pip install exa_py google-genai
+          pip install exa_py google-genai requests
           
       - name: Run News Script
         env:
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python scripts/daily_news.py
         
       - name: Commit and Push changes
