@@ -59,7 +59,7 @@ def summarize_news(news_context, category_name):
 
     prompt = f"""
     You are a professional news curator specializing in {category_name}. 
-    Summarize the following news context for {today}.
+    Summarize the following news context for {today} within 2000 characters
     
     MANDATES FROM PROJECT CONFIGURATION:
     {combined_mandates}

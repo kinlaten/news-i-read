@@ -16,7 +16,7 @@ DISCORD_MAX_CHARS = 1900
 NEWS_CATEGORIES = [
     {
         "name": "Tech News",
-        "query": "breaking tech news today",
+        "query": "top 10 news today from hacker news",
         "webhook_env": "DISCORD_WEBHOOK_TECH",
         "save_to_file": True,
     },

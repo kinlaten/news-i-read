@@ -1,7 +1,7 @@
 name: Daily Tech News Automation
 on:
   schedule:
-    - cron: '0 9 * * *' # Runs at 09:00 UTC every day
+    - cron: '0 21 * * *' # Runs at 21:00 UTC every day (7 AM AEST)
   workflow_dispatch: # Allows manual trigger
 
 permissions:

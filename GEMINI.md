@@ -2,4 +2,5 @@
 
 - Automatically create a markdown file (named by the day, e.g., '28.md') in the corresponding 'year/month' directory with the content of web search results after every search.
 - Ensure search results include the related link to the website for each piece of information.
-- Do not change ./scripts/config.py before ask 
+- Do not change @config.py before ask me
+- Ensure scraped news not duplicated. If duplicated, choose the most reliable source to summary, ignore other sources which have similar content.
